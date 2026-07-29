@@ -1,46 +1,38 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using NetworkCommunicator.Api.Enums;
+﻿using NetworkCommunicator.Api.Enums;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Xml.Serialization;
 
 namespace NetworkCommunicator.Api.Entities
 {
     [Serializable]
-    public partial class NetworkDetail : ObservableObject
+    public class NetworkDetail
     {
         [XmlElement]
-        [ObservableProperty]
-        private string _name;
-
-        [XmlElement]
-        [ObservableProperty]
-        private string _ipAddress;
-
-        [XmlElement]
-        [ObservableProperty]
-        private string _macAddress;
+        public string Name { get; set; } = string.Empty;
 
         [XmlIgnore]
-        [ObservableProperty]
-        private DeviceStatus _status;
+        public IPAddress IpAddress { get; set; } = IPAddress.None;
 
-        private NetworkDetail(string name, string ipAddress, string macAddress, DeviceStatus status)
+        [XmlElement("IpAddress")]
+        public string IpAddressXml
         {
-            Name = name;
-            IpAddress = ipAddress;
-            MacAddress = macAddress;
-            Status = status;
+            get => IpAddress.ToString();
+            set => IpAddress = string.IsNullOrWhiteSpace(value) ? IPAddress.None : IPAddress.Parse(value);
         }
 
-        public NetworkDetail(string name, string ipAddress, string macAddress) : this(name, ipAddress, macAddress, DeviceStatus.Offline)
+        [XmlIgnore]
+        public PhysicalAddress MacAddress { get; set; } = PhysicalAddress.None;
+
+
+        [XmlElement("MacAddress")]
+        public string MacAddressXml
         {
+            get => MacAddress.ToString();
+            set => MacAddress = string.IsNullOrWhiteSpace(value) ? PhysicalAddress.None : PhysicalAddress.Parse(value);
         }
 
-        public NetworkDetail()
-        {
-            Name = string.Empty;
-            IpAddress = string.Empty;
-            MacAddress = string.Empty;
-            Status = DeviceStatus.Offline;
-        }
+        [XmlIgnore]
+        public DeviceStatus Status { get; set; } = DeviceStatus.Offline;
     }
 }

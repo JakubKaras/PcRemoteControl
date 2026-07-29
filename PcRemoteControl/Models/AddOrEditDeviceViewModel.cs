@@ -1,19 +1,11 @@
-﻿using NetworkCommunicator.Api.Entities;
+﻿using PcRemoteControl.Entities;
 
 namespace PcRemoteControl.Models
 {
-    public class AddOrEditDeviceViewModel
+    public class AddOrEditDeviceViewModel(NetworkDetail device, bool isEdit)
     {
-        private readonly bool _isEdit = false;
+        public NetworkDetail Device { get; init; } = device;
 
-        public NetworkDetail Device { get; init; }
-
-        public string Title { get => _isEdit ? "Editing device" : "Adding new device"; }
-
-        public AddOrEditDeviceViewModel(NetworkDetail device, bool isEdit)
-        {
-            _isEdit = isEdit;
-            Device = device;
-        }
+        public string Title { get => isEdit ? "Editing device" : "Adding new device"; }
     }
 }

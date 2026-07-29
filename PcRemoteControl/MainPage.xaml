@@ -9,7 +9,7 @@
              xmlns:triggers="clr-namespace:PcRemoteControl.Triggers"
              x:Class="PcRemoteControl.MainPage"
              x:DataType="models:MainViewModel"
-             Loaded="OnLoaded">
+             Appearing="OnAppearing">
     <ContentPage.Resources>
         <converters:DeviceStatusToColorConvert x:Key="DeviceStatusToColor" />
         <converters:StringToIsVisibleConvert x:Key="StringToIsVisible" />
@@ -23,7 +23,7 @@
         <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
             <CollectionView
                 Grid.Row="0"
-                ItemsSource="{Binding NetworkDetailsDatabase.NetworkDetails}">
+                ItemsSource="{Binding NetworkDetails}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="entities:NetworkDetail">
                         <SwipeView Margin="0,2,0,2">
@@ -78,7 +78,7 @@
                                         <Label.FormattedText>
                                             <FormattedString>
                                                 <Span Text="{Binding Status}" FontAttributes="Bold" TextTransform="Uppercase"
-                                                        TextColor="{Binding Status, Converter={StaticResource deviceStatusToColor}}"/>
+                                                        TextColor="{Binding Status, Converter={StaticResource DeviceStatusToColor}}"/>
                                             </FormattedString>
                                         </Label.FormattedText>
                                     </Label>

@@ -13,11 +13,11 @@
 		<ApplicationTitle>PcRemoteControl</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.pcremotecontrol</ApplicationId>
+		<ApplicationId>com.k2industries.pcremotecontrol</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
+		<ApplicationDisplayVersion>2.0</ApplicationDisplayVersion>
+		<ApplicationVersion>2</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 	</PropertyGroup>

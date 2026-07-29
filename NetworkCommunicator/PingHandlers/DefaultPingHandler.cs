@@ -7,25 +7,25 @@ namespace NetworkCommunicator.PingHandlers
 {
     internal class DefaultPingHandler : IPingHandler
     {
-        public async Task<bool> Ping(NetworkDetail networkDetail)
+        public async Task<DeviceStatus> Ping(NetworkDetail networkDetail, IProgress<DeviceStatus> progress)
         {
-            Ping pinger = new();
             var isOnline = false;
+            var currentStatus = DeviceStatus.Loading;
 
             try
             {
-                networkDetail.Status = DeviceStatus.Loading;
+                using Ping pinger = new();
+                progress.Report(currentStatus);
                 var reply = await pinger.SendPingAsync(networkDetail.IpAddress);
                 isOnline = reply.Status == IPStatus.Success;
             }
             finally
             {
-                networkDetail.Status = isOnline ? DeviceStatus.Online : DeviceStatus.Offline;
-                pinger?.Dispose();
+                currentStatus = isOnline ? DeviceStatus.Online : DeviceStatus.Offline;
             }
 
-
-            return isOnline;
+            progress.Report(currentStatus);
+            return currentStatus;
         }
     }
 }

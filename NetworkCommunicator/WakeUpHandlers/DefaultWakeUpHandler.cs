@@ -3,13 +3,12 @@ using NetworkCommunicator.Api.Interfaces;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Net;
-using System.Text.RegularExpressions;
 
 namespace NetworkCommunicator.WakeUpHandlers
 {
     internal class DefaultWakeUpHandler : IWakeUpHandler
     {
-        private readonly byte[] _mutlicastAddress = new byte[] { 224, 0, 0, 1 };
+        private static readonly IPEndPoint _multicastEndpoint = new(new IPAddress([224, 0, 0, 1]), 7);
 
         public async Task WakeUp(NetworkDetail device)
         {
@@ -22,33 +21,27 @@ namespace NetworkCommunicator.WakeUpHandlers
             {
                 IPInterfaceProperties interfaceProperties = nic.GetIPProperties();
                 UnicastIPAddressInformation? unicastIPAddressInformation = interfaceProperties.UnicastAddresses
-                    .Where(u => u.Address.AddressFamily == AddressFamily.InterNetwork)
-                    .FirstOrDefault();
+                    .FirstOrDefault(u => u.Address.AddressFamily == AddressFamily.InterNetwork);
                 if (unicastIPAddressInformation != null)
                 {
-                    await SendMagicPacket(magicPacket, unicastIPAddressInformation.Address, new IPAddress(_mutlicastAddress));
+                    await SendMagicPacket(magicPacket, unicastIPAddressInformation.Address);
                     return;
                 }
             }
         }
 
-        private static byte[] BuildMagicPacket(string macAddress)
+        private static byte[] BuildMagicPacket(PhysicalAddress macAddress)
         {
-            macAddress = Regex.Replace(macAddress, "[: -]", "");
-            byte[] macBytes = Convert.FromHexString(macAddress);
-
             IEnumerable<byte> header = Enumerable.Repeat((byte)0xff, 6);
-            IEnumerable<byte> data = Enumerable.Repeat(macBytes, 16).SelectMany(x => x);
+            IEnumerable<byte> data = Enumerable.Repeat(macAddress.GetAddressBytes(), 16).SelectMany(x => x);
 
-            return header.Concat(data).ToArray();
+            return [.. header, .. data];
         }
 
-        private static async Task SendMagicPacket(byte[] magicPacket, IPAddress localIpAddress, IPAddress multicastIpAddress)
+        private static async Task SendMagicPacket(byte[] magicPacket, IPAddress localIpAddress)
         {
-            using (UdpClient udpClient = new UdpClient(new IPEndPoint(localIpAddress, 0)))
-            {
-                await udpClient.SendAsync(magicPacket, magicPacket.Length, new IPEndPoint(multicastIpAddress, 7));
-            }
+            using UdpClient udpClient = new(new IPEndPoint(localIpAddress, 0));
+            await udpClient.SendAsync(magicPacket, magicPacket.Length, _multicastEndpoint);
         }
     }
 }
