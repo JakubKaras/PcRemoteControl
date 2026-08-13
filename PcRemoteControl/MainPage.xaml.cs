@@ -36,9 +36,9 @@ namespace PcRemoteControl
             var tasks = ((MainViewModel)BindingContext).NetworkDetails
                 .Select(PerformPing);
 
-            await Task.WhenAll(tasks);
-
             ((MainViewModel)BindingContext).IsRefreshing = false;
+
+            await Task.WhenAll(tasks);
         }
 
         private async Task<DeviceStatus> PerformPing(NetworkDetail device)
