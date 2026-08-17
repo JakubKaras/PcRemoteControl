@@ -26,7 +26,7 @@ namespace NetworkCommunicator.DevicesDatabaseServices
                     ?? throw new FileLoadException("The XML was not loaded correctly.");
                 return [.. loadedData.Select(NetworkDetailXmlDto.FromDto)];
             }
-            catch (Exception e)
+            catch
             {
                 File.Delete(_savePath);
                 throw;

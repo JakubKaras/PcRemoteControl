@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NetworkCommunicator.Api.Interfaces;
+using NetworkCommunicator.Common;
 using NetworkCommunicator.DevicesDatabaseServices;
 using NetworkCommunicator.PingHandlers;
 using NetworkCommunicator.ShutdownHandlers;
+using NetworkCommunicator.Udp;
 using NetworkCommunicator.WakeUpHandlers;
 
 namespace NetworkCommunicator
@@ -15,6 +17,9 @@ namespace NetworkCommunicator
                     .AddTransient<IWakeUpHandler, DefaultWakeUpHandler>()
                     .AddTransient<IShutdownHandler, DefaultShutdownHandler>()
                     .AddTransient<IPingHandler, DefaultPingHandler>()
+                    .AddTransient<INetworkInterfaceProvider, NetworkInterfaceProvider>()
+                    .AddTransient<IUdpClientFactory, UdpClientFactory>()
+                    .AddTransient<IUdpClient, UdpClientAdapter>()
                     .AddSingleton<IDevicesDatabaseService>(new DefaultDevicesDatabaseService(appDataDirectory));
         }
     }
