@@ -24,7 +24,7 @@ namespace NetworkCommunicator.Tests.ShutdownHandlers
         }
     }
 
-    public class WhenShutdownIsSuccessful : DefaultShutdownHandlerTestsBase
+    public sealed class WhenShutdownIsSuccessful : DefaultShutdownHandlerTestsBase
     {
         private string _shutdownMessage = null!;
 
@@ -57,7 +57,7 @@ namespace NetworkCommunicator.Tests.ShutdownHandlers
         }
     }
 
-    public class WhenCreateThrows : DefaultShutdownHandlerTestsBase
+    public sealed class WhenCreateThrows : DefaultShutdownHandlerTestsBase
     {
         public WhenCreateThrows()
         {
@@ -73,7 +73,7 @@ namespace NetworkCommunicator.Tests.ShutdownHandlers
         }
     }
 
-    public class WhenConnectThrows : DefaultShutdownHandlerTestsBase
+    public sealed class WhenConnectThrows : DefaultShutdownHandlerTestsBase
     {
         public WhenConnectThrows()
         {
@@ -92,7 +92,7 @@ namespace NetworkCommunicator.Tests.ShutdownHandlers
         }
     }
 
-    public class WhenSendThrows : DefaultShutdownHandlerTestsBase
+    public sealed class WhenSendThrows : DefaultShutdownHandlerTestsBase
     {
         public WhenSendThrows()
         {
@@ -111,7 +111,7 @@ namespace NetworkCommunicator.Tests.ShutdownHandlers
         }
     }
 
-    public class WhenCreatingSocket : DefaultShutdownHandlerTestsBase
+    public sealed class WhenCreatingSocket : DefaultShutdownHandlerTestsBase
     {
         public WhenCreatingSocket()
         {
@@ -128,7 +128,7 @@ namespace NetworkCommunicator.Tests.ShutdownHandlers
         }
     }
 
-    public class WhenUsingSocket : DefaultShutdownHandlerTestsBase
+    public sealed class WhenUsingSocket : DefaultShutdownHandlerTestsBase
     {
         public WhenUsingSocket()
         {

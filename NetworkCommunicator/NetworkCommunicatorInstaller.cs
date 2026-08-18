@@ -18,11 +18,13 @@ namespace NetworkCommunicator
                     .AddTransient<IWakeUpHandler, DefaultWakeUpHandler>()
                     .AddTransient<IShutdownHandler, DefaultShutdownHandler>()
                     .AddTransient<IPingHandler, DefaultPingHandler>()
-                    .AddTransient<INetworkInterfaceProvider, NetworkInterfaceProvider>()
-                    .AddTransient<IUdpClientFactory, UdpClientFactory>()
+                    .AddSingleton<INetworkInterfaceProvider, NetworkInterfaceProvider>()
+                    .AddSingleton<IUdpClientFactory, UdpClientFactory>()
                     .AddTransient<IUdpClient, UdpClientAdapter>()
-                    .AddTransient<ISocketFactory, SocketFactory>()
+                    .AddSingleton<ISocketFactory, SocketFactory>()
                     .AddTransient<ISocket, SocketAdapter>()
+                    .AddSingleton<IPingFactory, PingFactory>()
+                    .AddTransient<IPing, PingAdapter>()
                     .AddSingleton<IDevicesDatabaseService>(new DefaultDevicesDatabaseService(appDataDirectory));
         }
     }

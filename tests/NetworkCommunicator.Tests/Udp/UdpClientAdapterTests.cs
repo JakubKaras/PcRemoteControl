@@ -12,7 +12,7 @@ namespace NetworkCommunicator.Tests.Udp
         protected readonly IUdpClient UnderTest = new UdpClientAdapter(LocalEndPoint);
     }
 
-    public class When_sending_valid_data : UdpClientAdapterTestsBase
+    public sealed class When_sending_valid_data : UdpClientAdapterTestsBase
     {
         [Fact]
         public async Task Then_data_arrives_to_endpoint()
@@ -48,7 +48,7 @@ namespace NetworkCommunicator.Tests.Udp
         }
     }
 
-    public class When_sending_invalid_data : UdpClientAdapterTestsBase
+    public sealed class When_sending_invalid_data : UdpClientAdapterTestsBase
     {
 
         [Fact]

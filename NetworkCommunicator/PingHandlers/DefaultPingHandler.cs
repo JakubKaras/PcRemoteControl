@@ -5,27 +5,28 @@ using System.Net.NetworkInformation;
 
 namespace NetworkCommunicator.PingHandlers
 {
-    internal class DefaultPingHandler : IPingHandler
+    internal class DefaultPingHandler(IPingFactory pingFactory) : IPingHandler
     {
         public async Task<DeviceStatus> Ping(NetworkDetail networkDetail, IProgress<DeviceStatus> progress)
         {
             var isOnline = false;
-            var currentStatus = DeviceStatus.Loading;
 
             try
             {
-                using Ping pinger = new();
-                progress.Report(currentStatus);
+                using IPing pinger = pingFactory.Create();
+                progress.Report(DeviceStatus.Loading);
                 var reply = await pinger.SendPingAsync(networkDetail.IpAddress);
-                isOnline = reply.Status == IPStatus.Success;
+                isOnline = reply != null && reply.Status == IPStatus.Success;
             }
-            finally
+            catch
             {
-                currentStatus = isOnline ? DeviceStatus.Online : DeviceStatus.Offline;
+                isOnline = false;
             }
+            
+            var finalStatus = isOnline ? DeviceStatus.Online : DeviceStatus.Offline;
 
-            progress.Report(currentStatus);
-            return currentStatus;
+            progress.Report(finalStatus);
+            return finalStatus;
         }
     }
 }
