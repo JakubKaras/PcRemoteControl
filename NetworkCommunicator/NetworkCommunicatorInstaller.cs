@@ -4,6 +4,7 @@ using NetworkCommunicator.Common;
 using NetworkCommunicator.DevicesDatabaseServices;
 using NetworkCommunicator.PingHandlers;
 using NetworkCommunicator.ShutdownHandlers;
+using NetworkCommunicator.Sockets;
 using NetworkCommunicator.Udp;
 using NetworkCommunicator.WakeUpHandlers;
 
@@ -20,6 +21,8 @@ namespace NetworkCommunicator
                     .AddTransient<INetworkInterfaceProvider, NetworkInterfaceProvider>()
                     .AddTransient<IUdpClientFactory, UdpClientFactory>()
                     .AddTransient<IUdpClient, UdpClientAdapter>()
+                    .AddTransient<ISocketFactory, SocketFactory>()
+                    .AddTransient<ISocket, SocketAdapter>()
                     .AddSingleton<IDevicesDatabaseService>(new DefaultDevicesDatabaseService(appDataDirectory));
         }
     }
