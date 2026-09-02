@@ -8,7 +8,7 @@ namespace NetworkCommunicator.WakeUpHandlers
 {
     internal class DefaultWakeUpHandler(INetworkInterfaceProvider networkInterfaceProvider, IUdpClientFactory udpClientFactory) : IWakeUpHandler
     {
-        private static readonly IPEndPoint _multicastEndpoint = new(new IPAddress([224, 0, 0, 1]), 7);
+        private static readonly IPEndPoint _broadcastEndpoint = new(IPAddress.Broadcast, 7);
 
         public async Task WakeUp(NetworkDetail device)
         {
@@ -41,7 +41,7 @@ namespace NetworkCommunicator.WakeUpHandlers
         private async Task SendMagicPacket(byte[] magicPacket, IPAddress localIpAddress)
         {
             using IUdpClient udpClient = udpClientFactory.Create(new IPEndPoint(localIpAddress, 0));
-            await udpClient.SendAsync(magicPacket, magicPacket.Length, _multicastEndpoint);
+            await udpClient.SendAsync(magicPacket, magicPacket.Length, _broadcastEndpoint);
         }
     }
 }

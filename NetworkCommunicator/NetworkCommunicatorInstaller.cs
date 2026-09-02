@@ -7,6 +7,7 @@ using NetworkCommunicator.ShutdownHandlers;
 using NetworkCommunicator.Sockets;
 using NetworkCommunicator.Udp;
 using NetworkCommunicator.WakeUpHandlers;
+using NetworkCommunicator.Xml;
 
 namespace NetworkCommunicator
 {
@@ -25,7 +26,9 @@ namespace NetworkCommunicator
                     .AddTransient<ISocket, SocketAdapter>()
                     .AddSingleton<IPingFactory, PingFactory>()
                     .AddTransient<IPing, PingAdapter>()
-                    .AddSingleton<IDevicesDatabaseService>(new DefaultDevicesDatabaseService(appDataDirectory));
+                    .AddTransient<IXmlFileStore, XmlFileStore>()
+                    .AddSingleton<IDevicesDatabaseService>(provider =>
+                        new DefaultDevicesDatabaseService(appDataDirectory, provider.GetRequiredService<IXmlFileStore>()));
         }
     }
 }

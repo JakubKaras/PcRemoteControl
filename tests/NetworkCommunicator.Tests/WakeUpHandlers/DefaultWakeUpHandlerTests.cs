@@ -191,7 +191,7 @@ namespace NetworkCommunicator.Tests.WakeUpHandlers
             Assert.True(_sentPacket.Take(6).All(b => b == 0xFF)); // First 6 bytes are 0xFF
             Assert.True(_sentPacket.Skip(6).Take(16 * 6).SequenceEqual(Enumerable.Repeat(NetworkDetail.MacAddress.GetAddressBytes(), 16).SelectMany(x => x))); // Next 16 repetitions of the MAC address)
             Assert.Equal(102, _sentLength); // 6 bytes of 0xFF + 16 repetitions of 6-byte MAC address
-            Assert.Equal(new(new IPAddress([224, 0, 0, 1]), 7), _sentEndpoint); // Sent to the multicast address and port 7
+            Assert.Equal(new(IPAddress.Broadcast, 7), _sentEndpoint); // Sent to the broadcast address and port 7
         }
     }
 }
