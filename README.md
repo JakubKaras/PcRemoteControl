@@ -1,4 +1,7 @@
 ## PC Remote Control
+
+[![Unit tests](https://github.com/JakubKaras/PcRemoteControl/actions/workflows/unit_tests.yml/badge.svg?branch=main)](https://github.com/JakubKaras/PcRemoteControl/actions/workflows/unit_tests.yml)
+
 Tool for interacting with devices over local network.
 
 This app uses .NET MAUI framework to create cross-platform remote control app for devices on local network.

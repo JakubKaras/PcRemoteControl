@@ -116,7 +116,6 @@ namespace PcRemoteControl
                 }
                 catch
                 {
-
                 }
             }
             else
