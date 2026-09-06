@@ -6,15 +6,15 @@ using System.Net;
 
 namespace NetworkCommunicator.WakeUpHandlers
 {
-    internal class DefaultWakeUpHandler : IWakeUpHandler
+    internal class DefaultWakeUpHandler(INetworkInterfaceProvider networkInterfaceProvider, IUdpClientFactory udpClientFactory) : IWakeUpHandler
     {
-        private static readonly IPEndPoint _multicastEndpoint = new(new IPAddress([224, 0, 0, 1]), 7);
+        private static readonly IPEndPoint _broadcastEndpoint = new(IPAddress.Broadcast, 7);
 
         public async Task WakeUp(NetworkDetail device)
         {
             byte[] magicPacket = BuildMagicPacket(device.MacAddress);
 
-            IEnumerable<NetworkInterface> interfaces = NetworkInterface.GetAllNetworkInterfaces()
+            IEnumerable<NetworkInterface> interfaces = networkInterfaceProvider.GetAllNetworkInterfaces()
                 .Where(nic => nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback);
 
             foreach (NetworkInterface nic in interfaces)
@@ -38,10 +38,10 @@ namespace NetworkCommunicator.WakeUpHandlers
             return [.. header, .. data];
         }
 
-        private static async Task SendMagicPacket(byte[] magicPacket, IPAddress localIpAddress)
+        private async Task SendMagicPacket(byte[] magicPacket, IPAddress localIpAddress)
         {
-            using UdpClient udpClient = new(new IPEndPoint(localIpAddress, 0));
-            await udpClient.SendAsync(magicPacket, magicPacket.Length, _multicastEndpoint);
+            using IUdpClient udpClient = udpClientFactory.Create(new IPEndPoint(localIpAddress, 0));
+            await udpClient.SendAsync(magicPacket, magicPacket.Length, _broadcastEndpoint);
         }
     }
 }
