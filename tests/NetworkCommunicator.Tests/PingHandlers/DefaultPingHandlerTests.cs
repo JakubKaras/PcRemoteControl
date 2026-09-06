@@ -61,7 +61,10 @@ namespace NetworkCommunicator.Tests.PingHandlers
             var reported = new List<DeviceStatus>();
             ProgressMock.Setup(p => p.Report(It.IsAny<DeviceStatus>()))
                         .Callback<DeviceStatus>(s => reported.Add(s));
-            PingMock.Setup(p => p.SendPingAsync(It.IsAny<IPAddress>())).ReturnsAsync((PingReply?)null);
+
+            // Use a real Ping to obtain a timed-out PingReply (non-routable IP per RFC 5737)
+            var realReply = await new Ping().SendPingAsync(IPAddress.Parse("192.0.2.1"), 10);
+            PingMock.Setup(p => p.SendPingAsync(It.IsAny<IPAddress>())).ReturnsAsync(realReply);
             PingMock.Setup(p => p.Dispose());
 
             // Act
