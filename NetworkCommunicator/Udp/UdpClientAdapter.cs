@@ -4,9 +4,9 @@ using NetworkCommunicator.Api.Interfaces;
 
 namespace NetworkCommunicator.Udp
 {
-    internal sealed class UdpClientAdapter(IPEndPoint localEndPoint) : IUdpClient
+    internal sealed class UdpClientAdapter() : IUdpClient
     {
-        private readonly UdpClient _udpClient = localEndPoint is null ? new UdpClient() : new UdpClient(localEndPoint);
+        private readonly UdpClient _udpClient = new();
 
         public async Task SendAsync(byte[] buffer, int bytes, IPEndPoint endpoint)
         {

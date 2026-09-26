@@ -9,7 +9,6 @@ namespace NetworkCommunicator.Tests.WakeUpHandlers
 {
     public abstract class DefaultWakeUpHandlerTestsBase
     {
-        protected readonly Mock<INetworkInterfaceProvider> _networkInterfaceProviderMock = new();
         protected readonly Mock<IUdpClientFactory> _udpClientFactoryMock = new();
 
         protected IWakeUpHandler UnderTest { get; set; } = null!;
@@ -20,143 +19,15 @@ namespace NetworkCommunicator.Tests.WakeUpHandlers
         };
     }
 
-    public sealed class When_No_Network_Interfaces : DefaultWakeUpHandlerTestsBase
-    {
-        public When_No_Network_Interfaces() : base()
-        {
-            _networkInterfaceProviderMock.Setup(provider => provider.GetAllNetworkInterfaces()).Returns([]);
-            UnderTest = new DefaultWakeUpHandler(_networkInterfaceProviderMock.Object, _udpClientFactoryMock.Object);
-        }
-
-        [Fact]
-        public async Task WakeUp_Should_Not_Send_Magic_Packet()
-        {
-            // Ask for a wake up
-            await UnderTest.WakeUp(NetworkDetail);
-
-            // The request is never sent, because we don't have anything to send it from
-            _udpClientFactoryMock.Verify(factory => factory.Create(It.IsAny<IPEndPoint>()), Times.Never);
-        }
-    }
-
-    public sealed class When_No_Active_Network_Interfaces : DefaultWakeUpHandlerTestsBase
-    {
-        public When_No_Active_Network_Interfaces() : base()
-        {
-            var downEthernetNicMock = new Mock<NetworkInterface>();
-            downEthernetNicMock.Setup(n => n.OperationalStatus).Returns(OperationalStatus.Down);
-            downEthernetNicMock.Setup(n => n.NetworkInterfaceType).Returns(NetworkInterfaceType.Ethernet);
-
-            var upLoopbackNicMock = new Mock<NetworkInterface>();
-            upLoopbackNicMock.Setup(n => n.OperationalStatus).Returns(OperationalStatus.Up);
-            upLoopbackNicMock.Setup(n => n.NetworkInterfaceType).Returns(NetworkInterfaceType.Loopback);
-
-            _networkInterfaceProviderMock.Setup(provider => provider.GetAllNetworkInterfaces()).Returns([downEthernetNicMock.Object, upLoopbackNicMock.Object]);
-            
-            UnderTest = new DefaultWakeUpHandler(_networkInterfaceProviderMock.Object, _udpClientFactoryMock.Object);
-        }
-
-        [Fact]
-        public async Task WakeUp_Should_Not_Send_Magic_Packet()
-        {
-            // Ask for a wake up
-            await UnderTest.WakeUp(NetworkDetail);
-
-            // The request is never sent, because we don't have anything to send it from
-            _udpClientFactoryMock.Verify(factory => factory.Create(It.IsAny<IPEndPoint>()), Times.Never);
-        }
-    }
-
-    public sealed class When_Active_Network_Interface_Has_No_Unicast_Address : DefaultWakeUpHandlerTestsBase
-    {
-        public When_Active_Network_Interface_Has_No_Unicast_Address() : base()
-        {
-            var ipPropsMock = new Mock<IPInterfaceProperties>();
-            ipPropsMock.Setup(p => p.UnicastAddresses)
-                .Returns(Mock.Of<UnicastIPAddressInformationCollection>(c =>
-                    c.GetEnumerator() == Enumerable.Empty<UnicastIPAddressInformation>().GetEnumerator()));
-
-            var nicMock = new Mock<NetworkInterface>();
-            nicMock.Setup(n => n.OperationalStatus).Returns(OperationalStatus.Up);
-            nicMock.Setup(n => n.NetworkInterfaceType).Returns(NetworkInterfaceType.Ethernet);
-            nicMock.Setup(n => n.GetIPProperties()).Returns(ipPropsMock.Object);
-
-            _networkInterfaceProviderMock.Setup(provider => provider.GetAllNetworkInterfaces()).Returns([nicMock.Object]);
-
-            UnderTest = new DefaultWakeUpHandler(_networkInterfaceProviderMock.Object, _udpClientFactoryMock.Object);
-        }
-
-        [Fact]
-        public async Task WakeUp_Should_Not_Send_Magic_Packet()
-        {
-            // Ask for a wake up
-            await UnderTest.WakeUp(NetworkDetail);
-
-            // The request is never sent, because we don't have anything to send it from
-            _udpClientFactoryMock.Verify(factory => factory.Create(It.IsAny<IPEndPoint>()), Times.Never);
-        }
-    }
-
-
-    public sealed class When_Active_Network_Interface_Has_No_Unicast_InterNetwork_Address : DefaultWakeUpHandlerTestsBase
-    {
-        public When_Active_Network_Interface_Has_No_Unicast_InterNetwork_Address() : base()
-        {
-            var unicastIpAddress = Mock.Of<UnicastIPAddressInformation>(ip => ip.Address == IPAddress.IPv6Loopback);
-            var unicastList = new List<UnicastIPAddressInformation> { unicastIpAddress };
-            var unicastIpAddressInformationCollectionMock = new Mock<UnicastIPAddressInformationCollection>();
-            unicastIpAddressInformationCollectionMock.Setup(c => c.GetEnumerator()).Returns(unicastList.GetEnumerator());
-
-            var ipInterfacePropertiesMock = new Mock<IPInterfaceProperties>();
-            ipInterfacePropertiesMock.Setup(properties => properties.UnicastAddresses).Returns(unicastIpAddressInformationCollectionMock.Object);
-
-            var nicMock = new Mock<NetworkInterface>();
-            nicMock.Setup(n => n.OperationalStatus).Returns(OperationalStatus.Up);
-            nicMock.Setup(n => n.NetworkInterfaceType).Returns(NetworkInterfaceType.Ethernet);
-            nicMock.Setup(n => n.GetIPProperties()).Returns(ipInterfacePropertiesMock.Object);
-
-            _networkInterfaceProviderMock.Setup(provider => provider.GetAllNetworkInterfaces()).Returns([nicMock.Object]);
-
-            UnderTest = new DefaultWakeUpHandler(_networkInterfaceProviderMock.Object, _udpClientFactoryMock.Object);
-        }
-
-        [Fact]
-        public async Task WakeUp_Should_Not_Send_Magic_Packet()
-        {
-            // Ask for a wake up
-            await UnderTest.WakeUp(NetworkDetail);
-
-            // The request is never sent, because we don't have anything to send it from
-            _udpClientFactoryMock.Verify(factory => factory.Create(It.IsAny<IPEndPoint>()), Times.Never);
-        }
-    }
-
-
-    public sealed class When_Active_Network_Interface_Has_Unicast_InterNetwork_Address : DefaultWakeUpHandlerTestsBase
+    public sealed class WhenWakeUpCallIsRequested : DefaultWakeUpHandlerTestsBase
     {
         private readonly Mock<IUdpClient> _client = new();
         private byte[] _sentPacket = null!;
         private int _sentLength = 0;
         private IPEndPoint _sentEndpoint = null!;
 
-        public When_Active_Network_Interface_Has_Unicast_InterNetwork_Address() : base()
+        public WhenWakeUpCallIsRequested() : base()
         {
-            var unicastIpAddress = Mock.Of<UnicastIPAddressInformation>(info => info.Address == IPAddress.Loopback); // IPv4 address
-            var unicastIpAddressList = new List<UnicastIPAddressInformation> { unicastIpAddress };
-
-            var unicastIpAddressInformationCollectionMock = new Mock<UnicastIPAddressInformationCollection>();
-            unicastIpAddressInformationCollectionMock.Setup(c => c.GetEnumerator()).Returns(unicastIpAddressList.GetEnumerator());
-
-            var ipInterfacePropertiesMock = new Mock<IPInterfaceProperties>();
-            ipInterfacePropertiesMock.Setup(properties => properties.UnicastAddresses).Returns(unicastIpAddressInformationCollectionMock.Object);
-
-            var nicMock = new Mock<NetworkInterface>();
-            nicMock.Setup(n => n.OperationalStatus).Returns(OperationalStatus.Up);
-            nicMock.Setup(n => n.NetworkInterfaceType).Returns(NetworkInterfaceType.Ethernet);
-            nicMock.Setup(n => n.GetIPProperties()).Returns(ipInterfacePropertiesMock.Object);
-
-            _networkInterfaceProviderMock.Setup(provider => provider.GetAllNetworkInterfaces()).Returns([nicMock.Object]);
-
             _client.Setup(client => client.SendAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<IPEndPoint>()))
                 .Callback<byte[], int, IPEndPoint>((buffer, length, endpoint) =>
                 {
@@ -165,9 +36,9 @@ namespace NetworkCommunicator.Tests.WakeUpHandlers
                     _sentEndpoint = endpoint;
                 })
                 .Returns(Task.CompletedTask);
-            _udpClientFactoryMock.Setup(factory => factory.Create(It.IsAny<IPEndPoint>())).Returns(_client.Object);
+            _udpClientFactoryMock.Setup(factory => factory.Create()).Returns(_client.Object);
 
-            UnderTest = new DefaultWakeUpHandler(_networkInterfaceProviderMock.Object, _udpClientFactoryMock.Object);
+            UnderTest = new DefaultWakeUpHandler(_udpClientFactoryMock.Object);
         }
 
         [Fact]
@@ -177,7 +48,7 @@ namespace NetworkCommunicator.Tests.WakeUpHandlers
             await UnderTest.WakeUp(NetworkDetail);
 
             // Request was sent
-            _udpClientFactoryMock.Verify(factory => factory.Create(It.IsAny<IPEndPoint>()), Times.Once);
+            _udpClientFactoryMock.Verify(factory => factory.Create(), Times.Once);
             _client.Verify(client => client.SendAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<IPEndPoint>()), Times.Once);
         }
 

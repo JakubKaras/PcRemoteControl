@@ -7,9 +7,7 @@ namespace NetworkCommunicator.Tests.Udp
 {
     public abstract class UdpClientAdapterTestsBase
     {
-        protected static readonly IPEndPoint LocalEndPoint = new(IPAddress.Loopback, 0);
-
-        protected readonly IUdpClient UnderTest = new UdpClientAdapter(LocalEndPoint);
+        protected readonly IUdpClient UnderTest = new UdpClientAdapter();
     }
 
     public sealed class When_sending_valid_data : UdpClientAdapterTestsBase
@@ -42,7 +40,7 @@ namespace NetworkCommunicator.Tests.Udp
         [Fact]
         public void Dispose_DoesNotThrow()
         {
-            var adapter = new UdpClientAdapter(new IPEndPoint(IPAddress.Loopback, 0));
+            var adapter = new UdpClientAdapter();
             var ex = Record.Exception(() => adapter.Dispose());
             Assert.Null(ex);
         }
@@ -54,14 +52,14 @@ namespace NetworkCommunicator.Tests.Udp
         [Fact]
         public async Task Then_buffer_is_null_throws()
         {
-            using var adapter = new UdpClientAdapter(new IPEndPoint(IPAddress.Loopback, 0));
+            using var adapter = new UdpClientAdapter();
             await Assert.ThrowsAsync<ArgumentNullException>(() => adapter.SendAsync(null!, 0, new IPEndPoint(IPAddress.Loopback, 1234)));
         }
 
         [Fact]
         public async Task Then_endpoint_is_null_throws()
         {
-            using var adapter = new UdpClientAdapter(new IPEndPoint(IPAddress.Loopback, 0));
+            using var adapter = new UdpClientAdapter();
             await Assert.ThrowsAsync<ArgumentNullException>(() => adapter.SendAsync([1, 2, 3], 3, null!));
         }
     }
