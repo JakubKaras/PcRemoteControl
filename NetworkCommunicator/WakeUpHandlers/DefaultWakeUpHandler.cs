@@ -1,33 +1,18 @@
 ﻿using NetworkCommunicator.Api.Entities;
 using NetworkCommunicator.Api.Interfaces;
 using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using System.Net;
 
 namespace NetworkCommunicator.WakeUpHandlers
 {
-    internal class DefaultWakeUpHandler(INetworkInterfaceProvider networkInterfaceProvider, IUdpClientFactory udpClientFactory) : IWakeUpHandler
+    internal class DefaultWakeUpHandler(IUdpClientFactory udpClientFactory) : IWakeUpHandler
     {
         private static readonly IPEndPoint _broadcastEndpoint = new(IPAddress.Broadcast, 7);
 
         public async Task WakeUp(NetworkDetail device)
         {
             byte[] magicPacket = BuildMagicPacket(device.MacAddress);
-
-            IEnumerable<NetworkInterface> interfaces = networkInterfaceProvider.GetAllNetworkInterfaces()
-                .Where(nic => nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback);
-
-            foreach (NetworkInterface nic in interfaces)
-            {
-                IPInterfaceProperties interfaceProperties = nic.GetIPProperties();
-                UnicastIPAddressInformation? unicastIPAddressInformation = interfaceProperties.UnicastAddresses
-                    .FirstOrDefault(u => u.Address.AddressFamily == AddressFamily.InterNetwork);
-                if (unicastIPAddressInformation != null)
-                {
-                    await SendMagicPacket(magicPacket, unicastIPAddressInformation.Address);
-                    return;
-                }
-            }
+            await SendMagicPacket(magicPacket);
         }
 
         private static byte[] BuildMagicPacket(PhysicalAddress macAddress)
@@ -38,9 +23,9 @@ namespace NetworkCommunicator.WakeUpHandlers
             return [.. header, .. data];
         }
 
-        private async Task SendMagicPacket(byte[] magicPacket, IPAddress localIpAddress)
+        private async Task SendMagicPacket(byte[] magicPacket)
         {
-            using IUdpClient udpClient = udpClientFactory.Create(new IPEndPoint(localIpAddress, 0));
+            using var udpClient = udpClientFactory.Create();
             await udpClient.SendAsync(magicPacket, magicPacket.Length, _broadcastEndpoint);
         }
     }
